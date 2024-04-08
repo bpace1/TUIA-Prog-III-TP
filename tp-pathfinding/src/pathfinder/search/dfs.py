@@ -1,5 +1,5 @@
 from ..models.grid import Grid
-from ..models.frontier import StackFrontier
+from ..models.frontier import StackFrontier, QueueFrontier
 from ..models.solution import NoSolution, Solution
 from ..models.node import Node
 
@@ -23,5 +23,11 @@ class DepthFirstSearch:
         
         # Add the node to the explored dictionary
         explored[node.state] = True
+        
+        frontier: QueueFrontier  = QueueFrontier()
+        frontier.add(node)
+        
+        while True:
+            
         
         return NoSolution(explored)
