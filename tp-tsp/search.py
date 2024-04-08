@@ -17,8 +17,7 @@ No viene implementado, se debe completar.
 
 
 from __future__ import annotations
-from problem import OptProblem, TSP
-from node import Node
+from problem import OptProblem
 from random import choice
 from time import time
 
@@ -57,98 +56,45 @@ class HillClimbing(LocalSearch):
         # Inicio del reloj
         start = time()
 
-        # Crear el nodo inicial
-        actual = Node(problem.init, problem.obj_val(problem.init))
-
-        
+        # Arrancamos del estado inicial
+        actual = problem.init
+        value = problem.obj_val(problem.init)
 
         while True:
 
             # Determinar las acciones que se pueden aplicar
             # y las diferencias en valor objetivo que resultan
-            diff = problem.val_diff(actual.state)
+            diff = problem.val_diff(actual)
 
-            # Buscar las acciones que generan el  mayor incremento de valor obj
+            # Buscar las acciones que generan el mayor incremento de valor obj
             max_acts = [act for act, val in diff.items() if val ==
                         max(diff.values())]
 
             # Elegir una accion aleatoria
             act = choice(max_acts)
 
-             # Retornar si estamos en un optimo local
+            # Retornar si estamos en un optimo local 
+            # (diferencia de valor objetivo no positiva)
             if diff[act] <= 0:
 
-                self.tour = actual.state
-                self.value = actual.value
+                self.tour = actual
+                self.value = value
                 end = time()
                 self.time = end-start
                 return
-                
-            # Sino, moverse a un nodo con el estado sucesor
+
+            # Sino, nos movemos al sucesor
             else:
 
-                actual = Node(problem.result(actual.state, act),
-                              actual.value + diff[act])
+                actual = problem.result(actual, act)
+                value = value + diff[act]
                 self.niters += 1
 
 
 class HillClimbingReset(LocalSearch):
     """Algoritmo de ascension de colinas con reinicio aleatorio."""
-    def solve(self, problem: OptProblem):
-        """Resuelve un problema de optimizacion con ascension de colinas.
 
-        Argumentos:
-        ==========
-        problem: OptProblem
-            un problema de optimizacion
-        """
-        # Inicio del reloj
-        start = time()
-
-        # Crear el nodo inicial
-        actual = Node(problem.init, problem.obj_val(problem.init))
-
-        #Definimos estos dos valores para usarlos en el random reset
-        self.value = float('-inf')
-        n = 10
-
-        while True:
-
-            # Determinar las acciones que se pueden aplicar
-            # y las diferencias en valor objetivo que resultan
-            diff = problem.val_diff(actual.state)
-
-            # Buscar las acciones que generan el  mayor incremento de valor obj
-            max_acts = [act for act, val in diff.items() if val ==
-                        max(diff.values())]
-
-            # Elegir una accion aleatoria
-            act = choice(max_acts)
-
-             # Retornar si estamos en un optimo local
-            if diff[act] <= 0:
-               #primero nos fijamos si es mayor al self.tour que tengo guardado
-               if self.value < actual.value:
-                    self.tour = actual.state
-                    self.value = actual.value
-                    end = time()
-                    self.time = end-start
-               else: 
-                pass
-                n -= 1
-               #si no me quedo con lo que tenia
-            #ahora reseteo si n es mayor a 0
-                if n > 0:
-                    TSP.random_reset(self)
-                else: 
-                    return
-                   
-            # Sino, moverse a un nodo con el estado sucesor
-            else:
-                actual = Node(problem.result(actual.state, act),
-                              actual.value + diff[act])
-                self.niters += 1
-    
+    # COMPLETAR
 
 
 class Tabu(LocalSearch):

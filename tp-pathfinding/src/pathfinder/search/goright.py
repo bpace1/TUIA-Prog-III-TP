@@ -3,6 +3,7 @@ from ..models.frontier import QueueFrontier
 from ..models.solution import NoSolution, Solution
 from ..models.node import Node
 
+
 class GoRight:
     @staticmethod
     def search(grid: Grid) -> Solution:

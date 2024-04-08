@@ -1,3 +1,4 @@
+from typing import Any
 from .node import Node
 
 class Solution:
@@ -6,7 +7,7 @@ class Solution:
     def __init__(
         self,
         node: Node,
-        reached: dict[tuple[int, int], any],
+        reached: dict[tuple[int, int], Any],
         time: float = 0
     ) -> None:
 
@@ -36,7 +37,7 @@ class NoSolution(Solution):
 
     def __init__(
         self,
-        reached: dict[tuple[int, int], any],
+        reached: dict[tuple[int, int], Any],
         time: float = 0
     ) -> None:
         self.path = []
