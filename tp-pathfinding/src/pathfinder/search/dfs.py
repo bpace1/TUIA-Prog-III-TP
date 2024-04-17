@@ -5,7 +5,7 @@ from ..models.node import Node
 
 class DepthFirstSearch:
     @staticmethod
-    def search(grid: Grid) -> Solution:
+    def search(grid: Grid) -> Solution | NoSolution:
         """Find path between two points in a grid using Depth First Search
 
         Args:
