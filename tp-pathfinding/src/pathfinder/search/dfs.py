@@ -38,7 +38,10 @@ class DepthFirstSearch:
             
             actions: dict[str, tuple[int, int]] = grid.get_neighbours(temp_node.state)
             
-            for action in actions:
+            actions_as_list: list = list(actions)
+            actions_as_list.sort(key=lambda x: x != "down")
+            
+            for action in actions_as_list:
                 solution: tuple[int, int] = actions[action]
 
                 if solution not in explored.keys(): 
