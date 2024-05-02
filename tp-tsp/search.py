@@ -17,10 +17,9 @@ No viene implementado, se debe completar.
 
 
 from __future__ import annotations
-from problem import OptProblem
+from problem import OptProblem, TSP
 from random import choice
 from time import time
-
 
 class LocalSearch:
     """Clase que representa un algoritmo de busqueda local general."""
@@ -61,7 +60,6 @@ class HillClimbing(LocalSearch):
         value = problem.obj_val(problem.init)
 
         while True:
-
             # Determinar las acciones que se pueden aplicar
             # y las diferencias en valor objetivo que resultan
             diff = problem.val_diff(actual)
@@ -93,8 +91,56 @@ class HillClimbing(LocalSearch):
 
 class HillClimbingReset(LocalSearch):
     """Algoritmo de ascension de colinas con reinicio aleatorio."""
+    def solve(self, problem: TSP):
+        start: float = time()
 
-    # COMPLETAR
+        cnt: int = 0
+        iterations: int = 50
+
+        # Arrancamos del estado inicial
+        actual: list[int] = problem.init
+        value = problem.obj_val(problem.init)
+
+        while True:
+            # Determinar las acciones que se pueden aplicar
+            # y las diferencias en valor objetivo que resultan
+            diff: dict[tuple[int, int], float] = problem.val_diff(actual)
+
+            # Buscar las acciones que generan el mayor incremento de valor obj
+            max_acts: list[tuple[int, int]] = [act for act, val in diff.items() if val ==
+                        max(diff.values())]
+
+            # Elegir una accion aleatoria
+            act: tuple[int, int] = choice(max_acts)
+
+            all_states_results: list[list[int]] = [actual]
+
+            # Retornar si estamos en un optimo local 
+            # (diferencia de valor objetivo no positiva)
+            if diff[act] <= 0:
+                actual = problem.random_reset()
+
+                all_states_results.append(actual)
+                
+                cnt += 1
+                
+                if cnt == iterations:
+                    values: list[float] = [problem.obj_val(state) for state in all_states_results]
+                    final_val: int = max(values)
+                    final_state: list[int] = all_states_results[values.index(final_val)]
+
+                    end = time()
+                    self.time = end-start
+                    self.tour = final_state
+                    self.value = final_val
+
+                    return 
+            else:
+                actual = problem.result(actual, act)
+                value = value + diff[act]
+                self.niters += 1
+    
+    
 
 
 class Tabu(LocalSearch):
