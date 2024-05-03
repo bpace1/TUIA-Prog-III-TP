@@ -6,7 +6,7 @@ from ..models.node import Node
 
 class GoRight:
     @staticmethod
-    def search(grid: Grid) -> Solution | NoSolution:
+    def search(grid: Grid) -> Solution:
         """Find path between two points in a grid using Go Right
 
         Args:
