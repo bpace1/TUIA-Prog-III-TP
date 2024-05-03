@@ -23,7 +23,7 @@ class DepthFirstSearch:
         # Add the node to the explored dictionary
         explored[node.state] = True
         
-        frontier: QueueFrontier  = QueueFrontier()
+        frontier: StackFrontier  = StackFrontier()
         frontier.add(node)
         
         if node.state == grid.end:

@@ -36,7 +36,6 @@ class LocalSearch:
         self.tour = problem.init
         self.value = problem.obj_val(problem.init)
 
-
 class HillClimbing(LocalSearch):
     """Clase que representa un algoritmo de ascension de colinas.
 
@@ -91,11 +90,11 @@ class HillClimbing(LocalSearch):
 
 class HillClimbingReset(LocalSearch):
     """Algoritmo de ascension de colinas con reinicio aleatorio."""
-    def solve(self, problem: TSP):
-        start: float = time()
+    def solve(self, problem: TSP) -> None:
+        start: int = time()
 
         cnt: int = 0
-        iterations: int = 50
+        iterations: int = 100
 
         # Arrancamos del estado inicial
         actual: list[int] = problem.init
@@ -139,11 +138,54 @@ class HillClimbingReset(LocalSearch):
                 actual = problem.result(actual, act)
                 value = value + diff[act]
                 self.niters += 1
-    
-    
-
 
 class Tabu(LocalSearch):
     """Algoritmo de busqueda tabu."""
+    def solve(self, problem: TSP) -> None:
+        # Inicio del reloj
+        start: int = time()
 
-    # COMPLETAR
+        iterations: int = 1000
+
+        # Arrancamos del estado inicial
+        actual: list[int] = problem.init
+        state_mejor: list[int] = actual
+        value_mejor: float = problem.obj_val(problem.init)
+        lista_tabu: list[int] = []
+
+        while self.niters < iterations:
+            # y las diferencias en valor objetivo que resultan
+            diff: dict[tuple[int, int], float] = problem.val_diff(actual)
+
+            no_tabues: dict = {}
+
+            for i,j in diff.items():
+                if i not in lista_tabu:
+                    no_tabues[i] = j
+
+            # Buscar las acciones que generan el mayor incremento de valor obj
+            max_acts: list[int] = [act for act, val in no_tabues.items() if val ==
+                        max(no_tabues.values())]
+
+            # Elegir una accion aleatoria
+            act: int = choice(max_acts)
+
+            # Nos movemos al sucesor
+            actual: list[int] = problem.result(actual, act)
+            value: float = problem.obj_val(actual)
+            
+            # La cantidad de valores lo decidimos comparando diversos numeros
+            if len(lista_tabu) > 40:
+                lista_tabu.pop(0)
+            
+            lista_tabu.append(act)
+            self.niters += 1
+            if value_mejor < value:
+                state_mejor = actual
+                value_mejor = value
+            
+        self.tour = state_mejor
+        self.value = value_mejor
+        end = time()
+        self.time = end-start
+        return state_mejor
