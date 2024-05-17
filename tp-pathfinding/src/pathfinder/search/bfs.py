@@ -3,61 +3,64 @@ from ..models.frontier import QueueFrontier
 from ..models.solution import NoSolution, Solution
 from ..models.node import Node
 
-
 class BreadthFirstSearch:
     @staticmethod
     def search(grid: Grid) -> Solution:
-        """Find path between two points in a grid using Breadth First Search
-
-        Args:
-            grid (Grid): Grid of points
-            
-        Returns:
-            Solution: Solution found
-        """
-        # Initialize a node with the initial position
+        # Inicializa un nodo con la posición inicial
         node: Node = Node("", grid.start, 0)
 
-        #check test
+        # Comprueba si el nodo inicial es el objetivo
         if node.state == grid.end:
+            # Retorna una solución con el nodo inicial si es el objetivo
             return Solution(node, explored)
         
-        # Initialize the explored dictionary to be empty
+        # Inicializa el diccionario de nodos explorados como vacío
         explored: dict = {} 
         
-        # Initialize QueueFrontier
+        # Inicializa la frontera de búsqueda como una cola
         frontier: QueueFrontier = QueueFrontier()
 
-        #Add first node
+        # Añade el nodo inicial a la frontera
         frontier.add(node)
 
-        # Add the node to the explored dictionary
+        # Añade el nodo inicial al diccionario de nodos explorados
         explored[node.state] = True
 
-
+        # Bucle principal del algoritmo BFS
         while True:
-            if frontier.is_empty(): return NoSolution(explored)
-            temp_node: Node = frontier.remove()
-            #tamo bien
-            #if temp_node.state in explored.keys() and temp_node.state != node.state: continue
-            #explored[temp_node.state] = True
+            # Si la frontera está vacía, no hay solución
+            if frontier.is_empty(): 
+                # Retorna un objeto NoSolution con el diccionario de nodos explorados
+                return NoSolution(explored)
             
+            # Obtiene el nodo de la frontera
+            temp_node: Node = frontier.remove()
+            
+            # Obtiene las acciones posibles desde el nodo actual y las ordena para mantener un orden predecible
             actions: dict[str, tuple[int, int]] = grid.get_neighbours(temp_node.state)
             actions_as_list: list = list(actions)
             actions_as_list.sort(key=lambda x: x != "down")
             
+            # Explora los nodos vecinos del nodo actual
             for action in actions_as_list:
+                # Obtiene la solución para una acción específica
                 solution: tuple[int, int] = actions[action]
 
+                # Si la solución no ha sido explorada, crea un nuevo nodo hijo
                 if solution not in explored.keys(): 
                     new_node: Node = Node(value="",
                                           state=solution,
-                                          cost=temp_node.cost+grid.get_cost(solution),
+                                          cost=temp_node.cost + grid.get_cost(solution),
                                           parent=temp_node,
                                           action=action)
-                                 
-                    if grid.end == new_node.state: return Solution(new_node, explored)
+                    
+                    # Si el nodo hijo es el objetivo, retorna la solución
+                    if grid.end == new_node.state:
+                        return Solution(new_node, explored)
+                    
+                    # Marca el nodo hijo como explorado y lo añade a la frontera
                     explored[new_node.state] = True
                     frontier.add(new_node)   
 
+        # Si no se encuentra solución, retorna un objeto NoSolution con el diccionario de nodos explorados
         return NoSolution(explored)
