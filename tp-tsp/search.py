@@ -55,20 +55,20 @@ class HillClimbing(LocalSearch):
         start = time()
 
         # Arrancamos del estado inicial
-        actual = problem.init
-        value = problem.obj_val(problem.init)
+        actual: list[int] = problem.init
+        value: float = problem.obj_val(problem.init)
 
         while True:
             # Determinar las acciones que se pueden aplicar
             # y las diferencias en valor objetivo que resultan
-            diff = problem.val_diff(actual)
+            diff: dict[tuple[int, int], float] = problem.val_diff(actual)
 
             # Buscar las acciones que generan el mayor incremento de valor obj
-            max_acts = [act for act, val in diff.items() if val ==
+            max_acts: list[tuple[int, int]] = [act for act, val in diff.items() if val ==
                         max(diff.values())]
 
             # Elegir una accion aleatoria
-            act = choice(max_acts)
+            act: tuple[int, int] = choice(max_acts)
 
             # Retornar si estamos en un optimo local 
             # (diferencia de valor objetivo no positiva)
@@ -88,7 +88,7 @@ class HillClimbing(LocalSearch):
                 self.niters += 1
 
 
-class HillClimbingReset(LocalSearch):
+class  (LocalSearch):
     """Algoritmo de ascension de colinas con reinicio aleatorio."""
     def solve(self, problem: TSP) -> None:
         start: int = time()
@@ -98,7 +98,7 @@ class HillClimbingReset(LocalSearch):
 
         # Arrancamos del estado inicial
         actual: list[int] = problem.init
-        value = problem.obj_val(problem.init)
+        value: float = problem.obj_val(problem.init)
 
         while True:
             # Determinar las acciones que se pueden aplicar
