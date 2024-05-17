@@ -1,58 +1,78 @@
 from ..models.grid import Grid
-from ..models.frontier import StackFrontier, QueueFrontier
+from ..models.frontier import StackFrontier
 from ..models.solution import NoSolution, Solution
 from ..models.node import Node
 
 class DepthFirstSearch:
     @staticmethod
     def search(grid: Grid) -> Solution | NoSolution:
-        """Find path between two points in a grid using Depth First Search
+        """
+        Encuentra un camino entre dos puntos en un grid utilizando búsqueda en profundidad.
 
         Args:
-            grid (Grid): Grid of points
+            grid (Grid): Grid de puntos
             
         Returns:
-            Solution: Solution found
+            Solution: Solución encontrada
         """
-        # Initialize a node with the initial position
+        # Inicializa un nodo con la posición inicial
         node: Node = Node("", grid.start, 0)
 
-        # Initialize the explored dictionary to be empty
+        # Inicializa el diccionario de nodos explorados como vacío
         explored: dict = {} 
         
-        # Add the node to the explored dictionary
+        # Añade el nodo inicial al diccionario de nodos explorados
         explored[node.state] = True
         
+        # Inicializa la frontera de búsqueda como una pila
         frontier: StackFrontier  = StackFrontier()
         frontier.add(node)
         
+        # Verifica si el nodo inicial es el objetivo
         if node.state == grid.end:
             return Solution(node, explored)
         
+        # Bucle principal del algoritmo de búsqueda en profundidad
         while True:
-            if frontier.is_empty(): return NoSolution(explored)
+            # Si la frontera está vacía, no hay solución
+            if frontier.is_empty(): 
+                return NoSolution(explored)
+            
+            # Extrae un nodo de la frontera
             temp_node: Node = frontier.remove()
             
-            if temp_node.state in explored.keys() and temp_node.state != node.state: continue
+            # Si el nodo actual ya ha sido explorado, pasa al siguiente nodo
+            if temp_node.state in explored.keys() and temp_node.state != node.state:
+                continue
+            
+            # Marca el nodo actual como explorado
             explored[temp_node.state] = True
             
+            # Obtiene las acciones posibles desde el nodo actual
             actions: dict[str, tuple[int, int]] = grid.get_neighbours(temp_node.state)
             
+            # Ordena las acciones para que se explore en un orden específico
             actions_as_list: list = list(actions)
             actions_as_list.sort(key=lambda x: x != "down")
             
+            # Explora las acciones posibles desde el nodo actual
             for action in actions_as_list:
                 solution: tuple[int, int] = actions[action]
 
+                # Si la solución no ha sido explorada, crea un nuevo nodo y lo añade a la frontera
                 if solution not in explored.keys(): 
                     new_node: Node = Node(value="",
                                           state=solution,
-                                          cost=temp_node.cost+grid.get_cost(solution),
+                                          cost=temp_node.cost + grid.get_cost(solution),
                                           parent=temp_node,
                                           action=action)
                                  
-                    if grid.end == new_node.state: return Solution(new_node, explored)
-                    frontier.add(new_node)       
+                    # Si se encuentra la solución, retorna la solución encontrada
+                    if grid.end == new_node.state: 
+                        return Solution(new_node, explored)
                     
-                
+                    # Añade el nuevo nodo a la frontera
+                    frontier.add(new_node)       
+
+        # Si no se encuentra solución, retorna un objeto NoSolution con el diccionario de nodos explorados
         return NoSolution(explored)

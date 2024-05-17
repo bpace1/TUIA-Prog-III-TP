@@ -51,45 +51,50 @@ class HillClimbing(LocalSearch):
         problem: OptProblem
             un problema de optimizacion
         """
-        # Inicio del reloj
+        # Inicio del reloj para medir el tiempo de ejecución del algoritmo
         start = time()
 
-        # Arrancamos del estado inicial
+        # Arrancamos desde el estado inicial definido en el problema
         actual = problem.init
+        # Evaluamos el valor objetivo del estado inicial
         value = problem.obj_val(problem.init)
 
         while True:
-            # Determinar las acciones que se pueden aplicar
-            # y las diferencias en valor objetivo que resultan
+            # Determinamos las acciones posibles desde el estado actual
+            # y calculamos las diferencias en valor objetivo que resultan de aplicar cada acción
             diff = problem.val_diff(actual)
 
-            # Buscar las acciones que generan el mayor incremento de valor obj
-            max_acts = [act for act, val in diff.items() if val ==
-                        max(diff.values())]
+            # Identificamos las acciones que generan el mayor incremento en el valor objetivo
+            max_acts = [act for act, val in diff.items() if val == max(diff.values())]
 
-            # Elegir una accion aleatoria
+            # Elegimos aleatoriamente una de las mejores acciones
             act = choice(max_acts)
 
-            # Retornar si estamos en un optimo local 
-            # (diferencia de valor objetivo no positiva)
+            # Si la diferencia de valor objetivo para la mejor acción no es positiva
+            # significa que hemos alcanzado un óptimo local
             if diff[act] <= 0:
-
+                # Guardamos el estado y el valor objetivo final
                 self.tour = actual
                 self.value = value
+                # Medimos el tiempo total de ejecución
                 end = time()
-                self.time = end-start
+                self.time = end - start
+                # Terminamos la ejecución del algoritmo
                 return
 
-            # Sino, nos movemos al sucesor
+            # Si no estamos en un óptimo local, nos movemos al estado sucesor
             else:
-
+                # Actualizamos el estado actual aplicando la acción elegida
                 actual = problem.result(actual, act)
+                # Actualizamos el valor objetivo sumando la diferencia producida por la acción
                 value = value + diff[act]
+                # Incrementamos el contador de iteraciones
                 self.niters += 1
 
 
 class HillClimbingReset(LocalSearch):
     """Algoritmo de ascension de colinas con reinicio aleatorio."""
+
     def solve(self, problem: TSP) -> None:
         start: int = time()
 
@@ -98,7 +103,7 @@ class HillClimbingReset(LocalSearch):
 
         # Arrancamos del estado inicial
         actual: list[int] = problem.init
-        value = problem.obj_val(problem.init)
+        value: float = problem.obj_val(problem.init)
 
         while True:
             # Determinar las acciones que se pueden aplicar
@@ -109,40 +114,51 @@ class HillClimbingReset(LocalSearch):
             max_acts: list[tuple[int, int]] = [act for act, val in diff.items() if val ==
                         max(diff.values())]
 
-            # Elegir una accion aleatoria
+            # Elegir una acción aleatoria entre las que generan el mayor incremento en el valor objetivo
             act: tuple[int, int] = choice(max_acts)
 
+            # Lista para almacenar todos los estados generados durante el reinicio
             all_states_results: list[list[int]] = [actual]
 
-            # Retornar si estamos en un optimo local 
-            # (diferencia de valor objetivo no positiva)
+            # Retornar si estamos en un óptimo local (diferencia de valor objetivo no positiva)
             if diff[act] <= 0:
+                # Reiniciamos aleatoriamente el estado y agregamos el nuevo estado a la lista de resultados
                 actual = problem.random_reset()
-
                 all_states_results.append(actual)
                 
+                # Incrementamos el contador de reinicios
                 cnt += 1
                 
+                # Si alcanzamos el número máximo de reinicios, seleccionamos el mejor estado encontrado
                 if cnt == iterations:
+                    # Evaluamos el valor objetivo de todos los estados generados durante el reinicio
                     values: list[float] = [problem.obj_val(state) for state in all_states_results]
+                    # Seleccionamos el estado con el mayor valor objetivo
                     final_val: int = max(values)
                     final_state: list[int] = all_states_results[values.index(final_val)]
 
+                    # Registro del tiempo y resultados finales
                     end = time()
-                    self.time = end-start
+                    self.time = end - start
                     self.tour = final_state
                     self.value = final_val
 
+                    # Terminamos la ejecución del algoritmo
                     return 
             else:
+                # Si no estamos en un óptimo local, nos movemos al estado sucesor
                 actual = problem.result(actual, act)
+                # Actualizamos el valor objetivo sumando la diferencia producida por la acción
                 value = value + diff[act]
+                # Incrementamos el contador de iteraciones
                 self.niters += 1
+
 
 class Tabu(LocalSearch):
     """Algoritmo de busqueda tabu."""
+
     def solve(self, problem: TSP) -> None:
-        # Inicio del reloj
+        # Inicio del reloj para medir el tiempo de ejecución del algoritmo
         start: int = time()
 
         iterations: int = 1000
@@ -154,38 +170,48 @@ class Tabu(LocalSearch):
         lista_tabu: list[int] = []
 
         while self.niters < iterations:
-            # y las diferencias en valor objetivo que resultan
+            # Calculamos las diferencias en valor objetivo que resultan de aplicar cada acción
             diff: dict[tuple[int, int], float] = problem.val_diff(actual)
 
+            # Filtramos las acciones que no están en la lista tabú
             no_tabues: dict = {}
 
-            for i,j in diff.items():
+            for i, j in diff.items():
                 if i not in lista_tabu:
                     no_tabues[i] = j
 
-            # Buscar las acciones que generan el mayor incremento de valor obj
+            # Buscamos las acciones que generan el mayor incremento de valor objetivo
             max_acts: list[int] = [act for act, val in no_tabues.items() if val ==
                         max(no_tabues.values())]
 
-            # Elegir una accion aleatoria
+            # Elegimos aleatoriamente una de las mejores acciones
             act: int = choice(max_acts)
 
-            # Nos movemos al sucesor
+            # Nos movemos al estado sucesor aplicando la acción seleccionada
             actual: list[int] = problem.result(actual, act)
             value: float = problem.obj_val(actual)
             
-            # La cantidad de valores lo decidimos comparando diversos numeros
+            # Actualizamos la lista tabú con la nueva acción
             if len(lista_tabu) > 40:
                 lista_tabu.pop(0)
             
             lista_tabu.append(act)
+            
+            # Incrementamos el contador de iteraciones
             self.niters += 1
+            
+            # Actualizamos el mejor estado y valor objetivo si encontramos una solución mejor
             if value_mejor < value:
                 state_mejor = actual
                 value_mejor = value
             
+        # Guardamos el mejor estado y valor objetivo encontrado
         self.tour = state_mejor
         self.value = value_mejor
+        
+        # Registro del tiempo de ejecución
         end = time()
-        self.time = end-start
+        self.time = end - start
+        
+        # Retornamos el mejor estado encontrado
         return state_mejor
